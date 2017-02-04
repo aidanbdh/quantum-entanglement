@@ -1,0 +1,26 @@
+{
+  "context-menu": {
+    "atom-text-editor": [
+      {
+        "label": "Toggle quantum-entanglement",
+        "command": "quantum-entanglement:toggle"
+      }
+    ]
+  },
+  "menu": [
+    {
+      "label": "Packages",
+      "submenu": [
+        {
+          "label": "quantum-entanglement",
+          "submenu": [
+            {
+              "label": "Toggle",
+              "command": "quantum-entanglement:toggle"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
