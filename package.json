@@ -1,10 +1,9 @@
 {
   "name": "quantum",
   "main": "./lib/quantum-entanglement",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "An atom plugin for users that want to edit the same file in real time.",
-  "keywords": [
-  ],
+  "keywords": [],
   "activationCommands": {
     "atom-workspace": "quantum-entanglement:toggle"
   },
@@ -13,6 +12,5 @@
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
