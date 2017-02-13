@@ -9,30 +9,25 @@ io.on('connection', socket => {
   socket.on('disconnect', () => {
     console.log('A user disconnected')
   })
-  socket.on('join', ({ name, file }) => {
+  socket.on('join', name => {
     socket.join(name)
     if(rooms.indexOf(name) === -1) {
       rooms.push(name)
       rooms.push({ host: socket.id })
+      console.log(`A user created ${name}`)
       socket.emit('joined', name)
     } else {
       socket.emit('file conflict')
     }
-    socket.on('continue', file => {
+    socket.on('continue', () => {
       socket.broadcast.to(rooms[rooms.indexOf(name)+1].host).emit('get file', socket.id)
-      socket.on('send file', originalFile => {
-        if(originalFile === file) {
-          console.log(`A user joined ${name}`)
-        } else {
-          socket.emit('replace', originalFile)
-          socket.emit('joined', name)
-        }
-      })
+    })
+    socket.on('send file', ({ id, file }) => {
+      console.log(`A user joined ${name}`)
+      socket.broadcast.to(id).emit('replace', file)
+      socket.broadcast.to(id).emit('joined', name)
     })
     socket.on('leave', function() { socket.leave(name) })
-  })
-  socket.on('redirect', ({id, file}) => {
-    socket.broadcast.to(id).emit('redirect', file)
   })
   socket.on('edit', event => {
     console.log(event)
