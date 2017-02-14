@@ -20,12 +20,15 @@ io.on('connection', socket => {
       socket.emit('file conflict')
     }
     socket.on('continue', () => {
-      socket.broadcast.to(rooms[rooms.indexOf(name)+1].host).emit('get file', socket.id)
+      socket.to(rooms[rooms.indexOf(name)+1].host).emit('get file', socket.id)
     })
     socket.on('send file', ({ id, file }) => {
       console.log(`A user joined ${name}`)
-      socket.broadcast.to(id).emit('replace', file)
-      socket.broadcast.to(id).emit('joined', name)
+      socket.to(id).emit('replace', file)
+      socket.to(id).emit('joined', name)
+    })
+    socket.on('cursor moved', event => {
+      socket.broadcast.to(name).emit('update cursor', event)
     })
     socket.on('leave', function() { socket.leave(name) })
   })
