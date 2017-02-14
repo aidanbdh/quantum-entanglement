@@ -22,9 +22,9 @@ io.on('connection', socket => {
     socket.on('continue', () => {
       socket.to(rooms[rooms.indexOf(name)+1].host).emit('get file', socket.id)
     })
-    socket.on('send file', ({ id, file }) => {
+    socket.on('send file', ({ id, file, cursors }) => {
       console.log(`A user joined ${name}`)
-      socket.to(id).emit('replace', file)
+      socket.to(id).emit('replace', { file, cursors })
       socket.to(id).emit('joined', name)
     })
     socket.on('cursor moved', event => {
