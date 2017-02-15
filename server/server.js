@@ -6,18 +6,16 @@ const rooms = []
 
 io.on('connection', socket => {
   console.log('A user connected')
-  socket.on('disconnect', () => {
-    console.log('A user disconnected')
-  })
   socket.on('join', name => {
     socket.join(name)
     if(rooms.indexOf(name) === -1) {
       rooms.push(name)
-      rooms.push({ host: socket.id, colors: ['white', 'black', 'maroon', 'red', 'pink', 'brown', 'orange', 'coral', 'olive', 'yellow', 'beige', 'lime', 'green', 'mint', 'teal', 'cyan', 'navy', 'blue', 'purple', 'lavender', 'magenta', 'grey'] })
+      rooms.push({ host: socket.id, connections: 0, colors: ['white', 'black', 'maroon', 'red', 'pink', 'brown', 'orange', 'coral', 'olive', 'yellow', 'beige', 'lime', 'green', 'mint', 'teal', 'cyan', 'navy', 'blue', 'purple', 'lavender', 'magenta', 'grey'] })
       console.log(`A user created ${name}`)
       const num = Math.floor(Math.random() * rooms[rooms.indexOf(name) + 1].colors.length)
       const color = rooms[rooms.indexOf(name) + 1].colors.slice(num, num + 1)
       socket.emit('joined', { name, color})
+      rooms[rooms.indexOf(name) + 1].connections++
     } else {
       socket.emit('file conflict')
     }
@@ -30,6 +28,7 @@ io.on('connection', socket => {
       const color = rooms[rooms.indexOf(name) + 1].colors.slice(num, num + 1)
       socket.to(id).emit('replace', { file, newCursors: cursors, color })
       socket.to(id).emit('joined', { name, color})
+      rooms[rooms.indexOf(name) + 1].connections++
     })
     socket.on('new socket', (cursor) => {
       socket.broadcast.to(name).emit('new socket', cursor)
@@ -38,6 +37,15 @@ io.on('connection', socket => {
       socket.broadcast.to(name).emit('update cursor', info)
     })
     socket.on('leave', function() { socket.leave(name) })
+    socket.on('disconnect', () => {
+      console.log('A user disconnected')
+      rooms[rooms.indexOf(name) + 1].connections--
+      if(rooms[rooms.indexOf(name) + 1].connections < 1) {
+        rooms.splice(rooms.indexOf(name), rooms.indexOf(name) + 2)
+        console.log(rooms)
+
+      }
+    })
   })
   socket.on('edit', event => {
     console.log(event)
