@@ -8,27 +8,30 @@ io.on('connection', socket => {
   console.log('A user connected')
   socket.on('join', name => {
     socket.join(name)
-    if(rooms.indexOf(name) === -1) {
+    let roomId = rooms.indexOf(name)
+    let forceDisconnect
+    if(roomId === -1) {
       rooms.push(name)
-      rooms.push({ host: socket.id, connections: 0, colors: ['white', 'black', 'maroon', 'red', 'pink', 'brown', 'orange', 'coral', 'olive', 'yellow', 'beige', 'lime', 'green', 'mint', 'teal', 'cyan', 'navy', 'blue', 'purple', 'lavender', 'magenta', 'grey'] })
+      rooms.push({ host: socket.id, connections: [], colors: ['white', 'black', 'maroon', 'red', 'pink', 'brown', 'orange', 'coral', 'olive', 'yellow', 'beige', 'lime', 'green', 'mint', 'teal', 'cyan', 'navy', 'blue', 'purple', 'lavender', 'magenta', 'grey'] })
       console.log(`A user created ${name}`)
-      const num = Math.floor(Math.random() * rooms[rooms.indexOf(name) + 1].colors.length)
-      const color = rooms[rooms.indexOf(name) + 1].colors.slice(num, num + 1)
+      roomId = 0
+      const num = Math.floor(Math.random() * rooms[roomId + 1].colors.length)
+      const color = rooms[roomId + 1].colors.slice(num, num + 1)
       socket.emit('joined', { name, color})
-      rooms[rooms.indexOf(name) + 1].connections++
+      rooms[roomId + 1].connections.push({id: socket.id, color})
     } else {
       socket.emit('file conflict')
     }
     socket.on('continue', () => {
-      socket.to(rooms[rooms.indexOf(name)+1].host).emit('get file', socket.id)
+      socket.to(rooms[roomId+1].host).emit('get file', socket.id)
     })
     socket.on('send file', ({ id, file, cursors }) => {
       console.log(`A user joined ${name}`)
-      const num = Math.floor(Math.random() * rooms[rooms.indexOf(name) + 1].colors.length)
-      const color = rooms[rooms.indexOf(name) + 1].colors.slice(num, num + 1)
+      const num = Math.floor(Math.random() * rooms[roomId + 1].colors.length)
+      const color = rooms[roomId + 1].colors.slice(num, num + 1)
       socket.to(id).emit('replace', { file, newCursors: cursors, color })
       socket.to(id).emit('joined', { name, color})
-      rooms[rooms.indexOf(name) + 1].connections++
+      rooms[roomId + 1].connections.push({id, color})
     })
     socket.on('new socket', (cursor) => {
       socket.broadcast.to(name).emit('new socket', cursor)
@@ -38,13 +41,17 @@ io.on('connection', socket => {
     })
     socket.on('leave', function() { socket.leave(name) })
     socket.on('disconnect', () => {
+      if(forceDisconnect) return;
       console.log('A user disconnected')
-      rooms[rooms.indexOf(name) + 1].connections--
-      if(rooms[rooms.indexOf(name) + 1].connections < 1) {
-        rooms.splice(rooms.indexOf(name), rooms.indexOf(name) + 2)
-        console.log(rooms)
-
+      const removed = rooms[roomId + 1].connections.splice(rooms[roomId + 1].connections.indexOf(socket.id), rooms[roomId + 1].connections.indexOf(socket.id) + 1)
+      if(rooms[roomId + 1].connections.length === 0) {
+        rooms.splice(roomId, roomId + 2)
+        return
       }
+      if(socket.id === rooms[roomId].host) rooms[roomId].host = rooms[roomId].connections[0].id
+      console.log('disconnect')
+      socket.broadcast.to(name).emit('disconnect', removed)
+      forceDisconnect = true
     })
   })
   socket.on('edit', event => {
