@@ -9,7 +9,7 @@ io.on('connection', socket => {
   socket.on('join', name => {
     socket.join(name)
     let roomId = rooms.indexOf(name)
-    let forceDisconnect
+    let forceDisconnect = false
     if(roomId === -1) {
       rooms.push(name)
       rooms.push({ host: socket.id, connections: [], colors: ['white', 'black', 'maroon', 'red', 'pink', 'brown', 'orange', 'coral', 'olive', 'yellow', 'beige', 'lime', 'green', 'mint', 'teal', 'cyan', 'navy', 'blue', 'purple', 'lavender', 'magenta', 'grey'] })
@@ -41,17 +41,21 @@ io.on('connection', socket => {
     })
     socket.on('leave', function() { socket.leave(name) })
     socket.on('disconnect', () => {
-      if(forceDisconnect) return;
-      console.log('A user disconnected')
-      const removed = rooms[roomId + 1].connections.splice(rooms[roomId + 1].connections.indexOf(socket.id), rooms[roomId + 1].connections.indexOf(socket.id) + 1)
-      if(rooms[roomId + 1].connections.length === 0) {
-        rooms.splice(roomId, roomId + 2)
-        return
+      if(!forceDisconnect) {
+        forceDisconnect = true
+        console.log(`A user has disconnected from ${name}`)
+        let removedId
+        rooms[roomId + 1].connections.forEach((value, index) => { if(value.id === socket.id) removedId = index})
+        const removed = rooms[roomId + 1].connections.splice(removedId, removedId + 1)
+        if(rooms[roomId + 1].connections.length === 0) {
+          rooms.splice(roomId, roomId + 2)
+          return
+        }
+        if(socket.id === rooms[roomId + 1].host) {
+          rooms[roomId + 1].host = rooms[roomId + 1].connections[0].id
+        }
+        io.to(name).emit('disconnect', removed[0])
       }
-      if(socket.id === rooms[roomId].host) rooms[roomId].host = rooms[roomId].connections[0].id
-      console.log('disconnect')
-      socket.broadcast.to(name).emit('disconnect', removed)
-      forceDisconnect = true
     })
   })
   socket.on('edit', event => {
