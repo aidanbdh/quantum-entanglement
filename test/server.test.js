@@ -2,10 +2,11 @@
 
 const createServer = require('../server/server')
 const { expect } = require('chai')
-const io = require('socket.io')()
 const client = require('socket.io-client')
 
 describe('server', () => {
+
+  const io = require('socket.io')()
 
   let server
   let hostSocket
