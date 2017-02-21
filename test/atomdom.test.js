@@ -3,8 +3,9 @@
 const { jsdom } = require('jsdom')
 const { expect } = require('chai')
 const alert = require('../lib/alert')
+const confirm = require('../lib/confirm')
 
-describe('', () => {
+describe('Atom DOM events', () => {
 
   before(() => {
 
@@ -30,6 +31,21 @@ describe('', () => {
       expect(element).to.have.property('tagName', 'DIV')
       const message = element.querySelector('.message')
       expect(message).to.have.property('textContent', 'test')
+    })
+
+  })
+
+  describe('confirm', () => {
+
+    it('returns a dom element', () => {
+      const element = confirm('test')
+      expect(element).to.have.property('tagName', 'DIV')
+      const message = element.querySelector('.message')
+      expect(message).to.have.property('textContent', 'test')
+      const buttons = element.querySelectorAll('button')
+      expect(buttons[0]).to.have.property('textContent', 'Yes')
+      expect(buttons[1]).to.have.property('textContent', 'No')
+
     })
 
   })
