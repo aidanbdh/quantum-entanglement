@@ -27,6 +27,8 @@ describe('server', () => {
    })
 
    after(() => {
+     hostSocket.disconnect()
+     guestSocket.disconnect()
      server.close()
    })
 

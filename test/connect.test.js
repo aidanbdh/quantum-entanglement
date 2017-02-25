@@ -11,10 +11,20 @@ const subscriptions = {
 }
 
 const text = {
-  getCursors: () => [{ onDidChangePosition: () => {}}],
+  cursors: [{
+    items: [],
+    tail: true,
+    onDidChangePosition: func => func,
+    setHeadBufferPosition: function(item) { this.items.push(item) },
+    clearTail: function() { this.tail = false }
+  }],
+  getCursors: function() { return this.cursors } ,
   textRange: [],
   getBuffer: () => ({
-    onDidChange: () => ({ dispose: () => 'gone'}),
+    onDidChange: func => ({
+      func,
+      dispose: () => 'gone'
+    }),
     setTextInRange: function(oldRange, newText) { text.textRange = [oldRange, newText] },
     getText: () => 'text'
   }),
@@ -120,7 +130,15 @@ describe('connect', () => {
           expect(alert.visible).to.equal(false)
           done()
         })
+      })
 
+      it('emits the leave event if no is selected', done => {
+        // guestConnect(inputs, alert, notification)
+        // guestSocket.emit('file conflict')
+        // guestSocket.once('continue', () => {
+        //   expect(alert.visible).to.equal(false)
+        //   done()
+        // })
       })
 
     })
@@ -167,6 +185,14 @@ describe('connect', () => {
 
     describe('edit', () => {
 
+      it('emits an event when the text changes.', done => {
+        subscriptions.list[1].func()
+        hostSocket.once('edit', event => {
+          expect(event).to.be.an('object')
+          done()
+        })
+      })
+
       it('sets the text in a range', done => {
         guestSocket.emit('insert', { oldRange: [1, 1], newText: 'text' })
         setTimeout(() => {
@@ -179,16 +205,21 @@ describe('connect', () => {
 
     describe('cursor moved', () => {
 
-      it('', done => {
-        done()
+      it('emits an event when the cursor moves', done => {
+        subscriptions.list[0]({ newBufferPosition: [2, 2] })
+        hostSocket.once('cursor moved', ({ newBufferPosition }) => {
+          expect(newBufferPosition).to.deep.equal([2, 2])
+          done()
+        })
       })
 
-    })
-
-    describe('leave', () => {
-
-      it('', done => {
-        done()
+      it('moves a cursor when a different user\'s cursor moves', done => {
+        hostSocket.emit('update cursor', { newBufferPosition: [2, 2], id: 0 })
+        setTimeout(() => {
+          expect(text.cursors[0].items[0]).to.deep.equal([2, 2])
+          expect(text.getCursors()[0].tail).to.equal(false)
+          done()
+        }, 100)
       })
 
     })
