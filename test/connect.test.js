@@ -12,6 +12,7 @@ const subscriptions = {
 
 const text = {
   cursors: [{
+    color: 'black',
     items: [],
     tail: true,
     onDidChangePosition: func => func,
@@ -63,7 +64,9 @@ const alert = {
   }
 }
 
-const notification = text => text
+const notifications = []
+
+const notification = text => notifications.push(text)
 
 
 describe('connect', () => {
@@ -133,12 +136,13 @@ describe('connect', () => {
       })
 
       it('emits the leave event if no is selected', done => {
-        // guestConnect(inputs, alert, notification)
-        // guestSocket.emit('file conflict')
-        // guestSocket.once('continue', () => {
-        //   expect(alert.visible).to.equal(false)
-        //   done()
-        // })
+        alert.event.target.textContent = 'No'
+        guestSocket.emit('file conflict')
+        guestSocket.once('leave', () => {
+          expect(alert.visible).to.equal(false)
+          expect(connected.value).to.equal(false)
+          done()
+        })
       })
 
     })
@@ -220,14 +224,6 @@ describe('connect', () => {
           expect(text.getCursors()[0].tail).to.equal(false)
           done()
         }, 100)
-      })
-
-    })
-
-    describe('disconnect', () => {
-
-      it('', done => {
-        done()
       })
 
     })
