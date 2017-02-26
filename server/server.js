@@ -1,4 +1,3 @@
-
 const rooms = []
 
 function createServer(io) {
