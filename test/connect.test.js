@@ -230,4 +230,16 @@ describe('connect', () => {
 
   })
 
+  describe('integration tests', () => {
+
+    it('connects a socket and makes it the host', done => {
+      done()
+    })
+
+    it('connects a socket', done => {
+      done()
+    })
+
+  })
+
 })
