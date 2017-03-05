@@ -1,7 +1,7 @@
 {
   "name": "quantum",
   "main": "./lib/quantum-entanglement",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "An atom plugin for users that want to edit the same file in real time.",
   "keywords": [],
   "activationCommands": {
