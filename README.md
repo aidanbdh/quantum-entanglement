@@ -16,3 +16,12 @@ If you are connecting to a pre-existing server, you will be asked to confirm you
 Questions? Comments? Issues? Bugs? Feel free to open an issue or email me at aidanbdh1998@gmail.com.
 
 If you are enjoying quantum-entanglement, please give it a star or a watch!
+
+Technologies
+- JavaScript
+- Socket.io
+- Mocha
+- Chai
+- Istanbul nyc
+- jsdom
+- uuid
